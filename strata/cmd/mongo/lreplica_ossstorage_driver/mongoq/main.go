@@ -7,7 +7,7 @@ package main
 
 import (
 	"github.com/naytzyrhc/rocks-strata/strata/cmd/mongo/lreplica_ossstorage_driver/lrossdriver"
-	"github.com/facebook/rocks-strata/strata/mongo"
+	"github.com/facebookgo/rocks-strata/strata/mongo"
 )
 
 func main() {
