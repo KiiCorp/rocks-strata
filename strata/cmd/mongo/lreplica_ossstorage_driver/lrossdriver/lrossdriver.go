@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/PinIdea/oss-aliyun-go"
-	"github.com/facebook/rocks-strata/strata"
+	"github.com/facebookgo/rocks-strata/strata"
 
 	"github.com/facebookgo/rocks-strata/strata/mongo/lreplica"
 	"github.com/naytzyrhc/rocks-strata/strata/ossstorage"

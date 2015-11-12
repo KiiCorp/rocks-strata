@@ -8,7 +8,7 @@ package main
 import (
 	"runtime"
 
-	"github.com/naytzyrhc/rocks-strata/strata"
+	"github.com/facebookgo/rocks-strata/strata"
 	"github.com/naytzyrhc/rocks-strata/strata/cmd/mongo/lreplica_ossstorage_driver/lrossdriver"
 )
 
