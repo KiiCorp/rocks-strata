@@ -24,7 +24,7 @@ import (
 type OSSStorage struct {
 	oss     *oss.OSS
 	bucket *oss.Bucket
-	region oss.Region
+	region string
 	auth   oss.Auth
 	prefix string
 }
@@ -37,8 +37,8 @@ func (s *OSSStorage) removePrefix(path string) string {
 	return path[len(s.prefix)+1:]
 }
 
-// NewS3Storage initializes the S3Storage with required AWS arguments
-func NewOSSStorage(region aws.Region, auth aws.Auth, bucketName string, prefix string, bucketACL oss.ACL) (*OSSStorage, error) {
+// NewOSSStorage initializes the OSSStorage with required OSS arguments
+func NewOSSStorage(region string, auth oss.Auth, bucketName string, prefix string, bucketACL oss.ACL) (*OSSStorage, error) {
 	ossobj := oss.New(auth, region)
 	bucket := ossobj.Bucket(bucketName)
 
