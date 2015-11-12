@@ -58,7 +58,7 @@ func NewOSSStorage(region string, auth oss.Auth, bucketName string, prefix strin
 // The reader is a wrapper around a ChecksummingReader. This protects against network corruption.
 func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 	path = s.addPrefix(path)
-	resp, err := s.bucket.HEAD(path)
+	resp, err := s.bucket.Head(path)
 	if resp == nil || err != nil {
 		if err.Error() == "The specified key does not exist." {
 			err = strata.ErrNotFound(path)
@@ -66,7 +66,7 @@ func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	body, err :=s.bucket.GET(path)
+	body, err :=s.bucket.Get(path)
 	if body == nil || err != nil {
 		if err.Error() == "The specified key does not exist." {
 			err = strata.ErrNotFound(path)
