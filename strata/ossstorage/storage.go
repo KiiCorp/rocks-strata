@@ -7,7 +7,6 @@ package ossstorage
 
 import (
 	"crypto/md5"
-	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"io"
@@ -59,13 +58,22 @@ func NewOSSStorage(region string, auth oss.Auth, bucketName string, prefix strin
 // The reader is a wrapper around a ChecksummingReader. This protects against network corruption.
 func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 	path = s.addPrefix(path)
-	resp, err := s.bucket.GetReader(path)
+	resp, err := s.bucket.HEAD(path)
 	if resp == nil || err != nil {
 		if err.Error() == "The specified key does not exist." {
 			err = strata.ErrNotFound(path)
 		}
 		return nil, err
 	}
+
+	body, err :=s.bucket.GET(path)
+	if body == nil || err != nil {
+		if err.Error() == "The specified key does not exist." {
+			err = strata.ErrNotFound(path)
+		}
+		return nil, err
+	}
+
 	etag, found := resp.Header["Etag"]
 	if !found {
 		return nil, errors.New("No Etag header")
@@ -78,7 +86,7 @@ func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return strata.NewChecksummingReader(resp.Body, checksum), nil
+	return strata.NewChecksummingReader(body, checksum), nil
 }
 
 // Put places the byte slice at the given path in S3.
