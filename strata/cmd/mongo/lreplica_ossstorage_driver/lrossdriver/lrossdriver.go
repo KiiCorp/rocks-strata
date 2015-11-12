@@ -19,7 +19,7 @@ import (
 
 // AWSOptions are common to all commands
 type OSSOptions struct {
-	Region       string `short:"R" long:"region" description:"AWS region name, such as \"us-east-1\"" default:"us-east-1"`
+	Region       string `short:"R" long:"region" description:"Aliyun region name, such as \"oss-cn-hangzhou\"" default:"oss-cn-hangzhou"`
 	BucketName   string `short:"b" long:"bucket" description:"Name of OSS bucket used to store the backups" required:"true"`
 	BucketPrefix string `short:"p" long:"bucket-prefix" description:"Prefix used when storing and retrieving files. Optional" optional:"true"`
 	BucketACL    string `short:"a" long:"bucket-acl" description:"ACL is one of private, public-read, public-read-write, authenticated-read, bucket-owner-read, or bucket-owner-full-control" default:"private"`
@@ -33,7 +33,7 @@ type ReplicaOptions struct {
 
 // Options define the common options needed by this strata command
 type Options struct {
-	OSS     OSSOptions     `group:"AWS Options"`
+	OSS     OSSOptions     `group:"OSS Options"`
 	Replica ReplicaOptions `group:"Replica Options"`
 }
 
