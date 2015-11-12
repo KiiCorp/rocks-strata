@@ -13,7 +13,7 @@ import (
 	"github.com/PinIdea/oss-aliyun-go"
 	"github.com/naytzyrhc/rocks-strata/strata"
 
-	"github.com/naytzyrhc/rocks-strata/strata/mongo/lreplica"
+	"github.com/facebookgo/rocks-strata/strata/mongo/lreplica"
 	"github.com/naytzyrhc/rocks-strata/strata/ossstorage"
 )
 
