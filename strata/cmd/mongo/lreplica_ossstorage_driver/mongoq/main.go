@@ -11,5 +11,5 @@ import (
 )
 
 func main() {
-	mongoq.RunCLI(lrs3driver.DriverFactory{Ops: &lrs3driver.Options{}})
+	mongoq.RunCLI(lrossdriver.DriverFactory{Ops: &lrossdriver.Options{}})
 }
