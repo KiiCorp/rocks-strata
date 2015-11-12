@@ -51,10 +51,10 @@ func (factory DriverFactory) GetOptions() interface{} {
 func (factory DriverFactory) Driver() (*strata.Driver, error) {
 	options := factory.GetOptions().(*Options)
 
-	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
-	secretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+	accessKey := os.Getenv("OSS_ACCESS_KEY_ID")
+	secretKey := os.Getenv("OSS_SECRET_ACCESS_KEY")
 	if accessKey == "" || secretKey == "" {
-		return nil, errors.New("Environment variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY must be set")
+		return nil, errors.New("Environment variables OSS_ACCESS_KEY_ID and OSS_SECRET_ACCESS_KEY must be set")
 	}
 
 	ossstorage, err := ossstorage.NewOSSStorage(
