@@ -6,7 +6,6 @@
 package ossstorage
 
 import (
-	"crypto/md5"
 	"encoding/hex"
 	"errors"
 	"io"
