@@ -66,13 +66,7 @@ func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 		return nil, err
 	}
 
-	body, err :=s.bucket.Get(path)
-	if body == nil || err != nil {
-		if err.Error() == "The specified key does not exist." {
-			err = strata.ErrNotFound(path)
-		}
-		return nil, err
-	}
+
 
 	etag, found := resp.Header["Etag"]
 	if !found {
@@ -86,7 +80,7 @@ func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return strata.NewChecksummingReader(body, checksum), nil
+	return strata.NewChecksummingReader(resp.Body, checksum), nil
 }
 
 // Put places the byte slice at the given path in S3.
