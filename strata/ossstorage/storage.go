@@ -12,7 +12,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/naytzyrhc/rocks-strata/strata"
+	"github.com/facebookgo/rocks-strata/strata"
 
 	"github.com/PinIdea/oss-aliyun-go"
 
