@@ -86,7 +86,6 @@ func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 // Put places the byte slice at the given path in S3.
 // Put also sends a checksum to protect against network corruption.
 func (s *OSSStorage) Put(path string, data []byte) error {
-	checksum := md5.Sum(data)
 	path = s.addPrefix(path)
 	err := s.bucket.Put(path, data, "application/octet-stream", oss.Private)
 	return err
