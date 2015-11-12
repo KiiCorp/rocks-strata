@@ -58,7 +58,7 @@ func (factory DriverFactory) Driver() (*strata.Driver, error) {
 	}
 
 	ossstorage, err := ossstorage.NewOSSStorage(
-		oss.Regions[options.OSS.Region],
+		options.OSS.Region,
 		oss.Auth{AccessKey: accessKey, SecretKey: secretKey},
 		options.OSS.BucketName,
 		options.OSS.BucketPrefix,
