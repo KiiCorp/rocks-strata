@@ -37,9 +37,9 @@ func (s *OSSStorage) removePrefix(path string) string {
 	return path[len(s.prefix)+1:]
 }
 
-// NewOSSStorage initializes the OSSStorage with required OSS arguments
+// NewStorage initializes the OSSStorage with required OSS arguments
 func NewOSSStorage(region string, auth oss.Auth, bucketName string, prefix string, bucketACL oss.ACL) (*OSSStorage, error) {
-	ossobj := oss.New(auth, region)
+	ossobj := oss.New(region, auth.AccessKey, auth.SecretKey)
 	bucket := ossobj.Bucket(bucketName)
 
 	err := bucket.PutBucket(bucketACL)
@@ -59,7 +59,7 @@ func NewOSSStorage(region string, auth oss.Auth, bucketName string, prefix strin
 // The reader is a wrapper around a ChecksummingReader. This protects against network corruption.
 func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 	path = s.addPrefix(path)
-	resp, err := s.bucket.GetResponse(path)
+	resp, err := s.bucket.GetReader(path)
 	if resp == nil || err != nil {
 		if err.Error() == "The specified key does not exist." {
 			err = strata.ErrNotFound(path)
@@ -86,8 +86,7 @@ func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 func (s *OSSStorage) Put(path string, data []byte) error {
 	checksum := md5.Sum(data)
 	path = s.addPrefix(path)
-	err := s.bucket.Put(path, data, "application/octet-stream", oss.Private,
-		oss.Options{ContentMD5: base64.StdEncoding.EncodeToString(checksum[:])})
+	err := s.bucket.Put(path, data, "application/octet-stream", oss.Private)
 	return err
 }
 
