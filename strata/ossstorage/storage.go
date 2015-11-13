@@ -3,11 +3,9 @@
 //  LICENSE file in the root directory of this source tree. An additional grant
 //  of patent rights can be found in the PATENTS file in the same directory.
 
-package s3storage
+package ossstorage
 
 import (
-	"crypto/md5"
-	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"io"
@@ -16,38 +14,38 @@ import (
 
 	"github.com/facebookgo/rocks-strata/strata"
 
-	"github.com/AdRoll/goamz/aws"
-	"github.com/AdRoll/goamz/s3"
+	"github.com/PinIdea/oss-aliyun-go"
+
 )
 
-// S3Storage implements the strata.Storage interface using S3 as its storage backing
-type S3Storage struct {
-	s3     *s3.S3
-	bucket *s3.Bucket
-	region aws.Region
-	auth   aws.Auth
+// OSSStorage implements the strata.Storage interface using OSS as its storage backing
+type OSSStorage struct {
+	oss     *oss.OSS
+	bucket *oss.Bucket
+	region string
+	auth   oss.Auth
 	prefix string
 }
 
-func (s *S3Storage) addPrefix(path string) string {
+func (s *OSSStorage) addPrefix(path string) string {
 	return s.prefix + "/" + path
 }
 
-func (s *S3Storage) removePrefix(path string) string {
+func (s *OSSStorage) removePrefix(path string) string {
 	return path[len(s.prefix)+1:]
 }
 
-// NewS3Storage initializes the S3Storage with required AWS arguments
-func NewS3Storage(region aws.Region, auth aws.Auth, bucketName string, prefix string, bucketACL s3.ACL) (*S3Storage, error) {
-	s3obj := s3.New(auth, region)
-	bucket := s3obj.Bucket(bucketName)
+// NewStorage initializes the OSSStorage with required OSS arguments
+func NewOSSStorage(region string, auth oss.Auth, bucketName string, prefix string, bucketACL oss.ACL) (*OSSStorage, error) {
+	ossobj := oss.New(region, auth.AccessKey, auth.SecretKey)
+	bucket := ossobj.Bucket(bucketName)
 
 	err := bucket.PutBucket(bucketACL)
 	if err != nil {
 		return nil, err
 	}
-	return &S3Storage{
-		s3:     s3obj,
+	return &OSSStorage{
+		oss:     ossobj,
 		bucket: bucket,
 		region: region,
 		auth:   auth,
@@ -57,15 +55,18 @@ func NewS3Storage(region aws.Region, auth aws.Auth, bucketName string, prefix st
 
 // Get returns a reader to the specified S3 path.
 // The reader is a wrapper around a ChecksummingReader. This protects against network corruption.
-func (s *S3Storage) Get(path string) (io.ReadCloser, error) {
+func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 	path = s.addPrefix(path)
-	resp, err := s.bucket.GetResponse(path)
+	resp, err := s.bucket.Head(path)
 	if resp == nil || err != nil {
 		if err.Error() == "The specified key does not exist." {
 			err = strata.ErrNotFound(path)
 		}
 		return nil, err
 	}
+
+
+
 	etag, found := resp.Header["Etag"]
 	if !found {
 		return nil, errors.New("No Etag header")
@@ -83,17 +84,15 @@ func (s *S3Storage) Get(path string) (io.ReadCloser, error) {
 
 // Put places the byte slice at the given path in S3.
 // Put also sends a checksum to protect against network corruption.
-func (s *S3Storage) Put(path string, data []byte) error {
-	checksum := md5.Sum(data)
+func (s *OSSStorage) Put(path string, data []byte) error {
 	path = s.addPrefix(path)
-	err := s.bucket.Put(path, data, "application/octet-stream", s3.Private,
-		s3.Options{ContentMD5: base64.StdEncoding.EncodeToString(checksum[:])})
+	err := s.bucket.Put(path, data, "application/octet-stream", oss.Private)
 	return err
 }
 
 // PutReader consumes the given reader and stores it at the specified path in S3.
 // A checksum is used to protect against network corruption.
-func (s *S3Storage) PutReader(path string, reader io.Reader) error {
+func (s *OSSStorage) PutReader(path string, reader io.Reader) error {
 	// TODO(agf): S3 will send a checksum as a response after we do a PUT.
 	// We could compute our checksum on the fly by using an ChecksummingReader,
 	// and then compare the checksum to the one that S3 sends back. However,
@@ -108,14 +107,14 @@ func (s *S3Storage) PutReader(path string, reader io.Reader) error {
 }
 
 // Delete removes the object at the given S3 path
-func (s *S3Storage) Delete(path string) error {
+func (s *OSSStorage) Delete(path string) error {
 	path = s.addPrefix(path)
 	err := s.bucket.Del(path)
 	return err
 }
 
 // List returns a list of objects (up to maxSize) with the given prefix from S3
-func (s *S3Storage) List(prefix string, maxSize int) ([]string, error) {
+func (s *OSSStorage) List(prefix string, maxSize int) ([]string, error) {
 	prefix = s.addPrefix(prefix)
 	pathSeparator := ""
 	marker := ""
@@ -123,9 +122,9 @@ func (s *S3Storage) List(prefix string, maxSize int) ([]string, error) {
 	items := make([]string, 0, 1000)
 	for maxSize > 0 {
 		// Don't ask for more than 1000 keys at a time. This makes
-		// testing simpler because S3 will return at most 1000 keys even if you
-		// ask for more, but s3test will return more than 1000 keys if you ask
-		// for more. TODO(agf): Fix this behavior in s3test.
+		// testing simpler because OSS will return at most 1000 keys even if you
+		// ask for more, but osstest will return more than 1000 keys if you ask
+		// for more. TODO(agf): Fix this behavior in osstest.
 		maxReqSize := 1000
 		if maxSize < 1000 {
 			maxReqSize = maxSize
@@ -150,11 +149,11 @@ func (s *S3Storage) List(prefix string, maxSize int) ([]string, error) {
 }
 
 // Lock is not implemented
-func (s *S3Storage) Lock(path string) error {
+func (s *OSSStorage) Lock(path string) error {
 	return nil
 }
 
 // Unlock is not implemented
-func (s *S3Storage) Unlock(path string) error {
+func (s *OSSStorage) Unlock(path string) error {
 	return nil
 }
