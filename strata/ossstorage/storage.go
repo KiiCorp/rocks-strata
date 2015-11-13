@@ -15,12 +15,11 @@ import (
 	"github.com/facebookgo/rocks-strata/strata"
 
 	"github.com/PinIdea/oss-aliyun-go"
-
 )
 
 // OSSStorage implements the strata.Storage interface using OSS as its storage backing
 type OSSStorage struct {
-	oss     *oss.OSS
+	oss    *oss.OSS
 	bucket *oss.Bucket
 	region string
 	auth   oss.Auth
@@ -45,7 +44,7 @@ func NewOSSStorage(region string, auth oss.Auth, bucketName string, prefix strin
 		return nil, err
 	}
 	return &OSSStorage{
-		oss:     ossobj,
+		oss:    ossobj,
 		bucket: bucket,
 		region: region,
 		auth:   auth,
@@ -64,8 +63,6 @@ func (s *OSSStorage) Get(path string) (io.ReadCloser, error) {
 		}
 		return nil, err
 	}
-
-
 
 	etag, found := resp.Header["Etag"]
 	if !found {
